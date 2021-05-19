@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Set;
@@ -67,8 +68,18 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
-//        init();
         initViewListeners();
+
+        try {
+            bluetoothServer = new BluetoothServer(bluetoothAdapter.listenUsingRfcommWithServiceRecord("app", uuid));
+            bluetoothServer.setOnInputReceiveListener(new IOnInputReceiveListener() {
+                @Override
+                public void onReceive(String data) {
+                    receivedText.setText(data);
+                }
+            });
+            bluetoothServer.start();
+        } catch (IOException e) { e.printStackTrace(); }
 
     }
 
