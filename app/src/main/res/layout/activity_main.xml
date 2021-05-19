@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+
+    <ListView
+        android:id="@+id/pairedDevicesLv"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </ListView>
+
+
+    <TextView
+        android:id="@+id/receivedText"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="96dp"
+        android:gravity="center"
+        android:text="hello"
+        android:textSize="23sp"
+        app:layout_constraintEnd_toEndOf="@+id/pairedDevicesLv"
+        app:layout_constraintTop_toBottomOf="@+id/pairedDevicesLv" />
+
+    <EditText
+        android:id="@+id/outputText"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:hint="send"
+        app:layout_constraintEnd_toEndOf="@id/receivedText"
+        app:layout_constraintTop_toBottomOf="@id/receivedText"/>
+
+
+    <Button
+        android:id="@+id/sendBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="112dp"
+        android:text="send"
+        app:layout_constraintEnd_toEndOf="@id/outputText"
+        app:layout_constraintTop_toBottomOf="@id/outputText" />
+
+    <LinearLayout
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+
+        <Button
+            android:id="@+id/connBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="connect" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+                android:id="@+id/listPairedBtn"
+            android:text="List Paired" />
+
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

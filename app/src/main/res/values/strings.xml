@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Arduino Blue Control</string>
+
+    <string name="func_2">Func 2</string>
+    <string name="func_1">Func 1</string>
+    <string name="none">none</string>
+
+    <string name="disp_text">Nome do dispositivo: </string>
+    <string name="mac_address">none</string>
+    <string name="uuid_text">uuid</string>
+</resources>
