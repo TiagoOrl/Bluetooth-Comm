@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.bluetooth.BluetoothAdapter;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -75,7 +76,9 @@ public class MainActivity extends AppCompatActivity {
             bluetoothServer.setOnInputReceiveListener(new IOnInputReceiveListener() {
                 @Override
                 public void onReceive(String data) {
+                    receivedText.setText("");
                     receivedText.setText(data);
+                    receivedText.invalidate();
                 }
             });
             bluetoothServer.start();
@@ -109,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             deviceChoosen = devices.get(position);
+
+                            Log.d("MAIN", "onItemClick: -----------------" + deviceChoosen.getName());
                         }
                     });
                 }
@@ -130,13 +135,12 @@ public class MainActivity extends AppCompatActivity {
         connBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (bluetoothClient != null) bluetoothClient.cancel();
+                if (bluetoothClient != null){ bluetoothClient.cancel();  bluetoothClient.interrupt(); }
                 bluetoothClient = new BluetoothClient(deviceChoosen, uuid, bluetoothAdapter);
                 bluetoothClient.start();
             }
         });
     }
-
 }
 
 

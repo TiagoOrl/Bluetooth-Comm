@@ -37,20 +37,19 @@ public class BluetoothServer extends Thread {
 
         buffer = new byte[1024];
         try {
-            BluetoothSocket socket = null;
+            BluetoothSocket btSocket = null;
 
             while(true) {
-                Log.d("INPUT: ", "----------------- WAITING FOR SOCKET");
-                socket = bluetoothServerSocket.accept();
-                if (socket != null) break;
+                Log.d("SERVER: ", "----------------- WAITING FOR SOCKET");
+                btSocket = bluetoothServerSocket.accept();
+                if (btSocket != null) break;
             }
-            in = socket.getInputStream();
 
-            in.read(buffer);
-            Log.d("INPUT: ", "----------------- ACCEPTED");
+            Log.d("SERVER: ", "----------------- ACCEPTED");
 
             while (true){
-                Log.d("INPUT: ", "----------------- " + Arrays.toString(buffer));
+                in = btSocket.getInputStream();
+                in.read(buffer);
                 if (iOnInputReceiveListener != null)
                     iOnInputReceiveListener.onReceive(new String(buffer, Charset.defaultCharset()));
             }

@@ -61,6 +61,7 @@ public class ConnectedBTSocket extends Thread {
         Log.d("CONN", "write: Writing to outputstream: " + text);
         try {
             mmOutStream.write(bytes);
+            mmOutStream.flush();
         } catch (IOException e) {
             Log.e("CONN", "write: Error writing to output stream. " + e.getMessage() );
         }
