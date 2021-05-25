@@ -10,7 +10,7 @@ import java.util.UUID;
 
 // Client Thread: tries to connect to the Server Thread
 public class BluetoothClient extends Thread {
-    private BluetoothSocket mmSocket;
+    private BluetoothSocket mBTSocket;
     private BluetoothDevice mmDevice;
     private UUID deviceUUID;
     private BluetoothAdapter mainBluetoothAdapter;
@@ -37,7 +37,7 @@ public class BluetoothClient extends Thread {
             Log.e("CONN", "Client: Could not create InsecureRfcommSocket " + e.getMessage());
         }
 
-        mmSocket = tmp;
+        mBTSocket = tmp;
 
         // Always cancel discovery because it will slow down a connection
         mainBluetoothAdapter.cancelDiscovery();
@@ -46,20 +46,20 @@ public class BluetoothClient extends Thread {
 
         try {
             //blocking call
-            mmSocket.connect();
+            mBTSocket.connect();
 
             Log.d("CONN", "run: Client connected.");
         } catch (IOException e) {
             // Close the socket
             try {
-                mmSocket.close();
+                mBTSocket.close();
             } catch (IOException e1) {
                 Log.e("CONN", "Client: run: Unable to close connection in socket " + e1.getMessage());
             }
             Log.d("CONN", "run: Client: Could not connect to UUID: " + deviceUUID );
         }
 
-        connectedBTSocket = new ConnectedBTSocket(mmSocket);
+        connectedBTSocket = new ConnectedBTSocket(mBTSocket);
         connectedBTSocket.start();
     }
 
@@ -69,10 +69,10 @@ public class BluetoothClient extends Thread {
     }
 
 
-    public void cancel() {
+    public void closeConn() {
         try {
             Log.d("CONN", "cancel: Closing Client Socket.");
-            mmSocket.close();
+            mBTSocket.close();
 
         } catch (IOException e) {
             Log.e("CONN", "cancel: close() of mmSocket in Client failed. " + e.getMessage());

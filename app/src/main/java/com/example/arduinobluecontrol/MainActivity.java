@@ -3,6 +3,8 @@ package com.example.arduinobluecontrol;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.bluetooth.BluetoothDevice;
@@ -13,16 +15,12 @@ import android.bluetooth.BluetoothAdapter;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -30,18 +28,19 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
+
     private static UUID uuid = UUID.fromString("1c351fcc-217e-4974-b328-b0441407a604");
     private static final int REQUEST_ENABLE_BT = 10;
     public BluetoothAdapter bluetoothAdapter;
-    private Button sendDataBtn, connBtn;
-    public TextView receivedText;
+    private Button sendDataBtn;
+    private RecyclerView devcsListRv;
+    public TextView msgsBox;
     EditText outputText;
-    private ListView pairedDevicesLv;
-    private ArrayList<BluetoothDevice> devices;
-    private BluetoothDevice deviceChoosen = null;
+    private ArrayList<DeviceItem> devicesList;
 
     public BluetoothServer bluetoothServer;
-    public BluetoothClient bluetoothClient;
 
 
     @Override
@@ -49,7 +48,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        devices = new ArrayList<>();
+
+        devicesList = new ArrayList<>();
+        layoutManager = new LinearLayoutManager(this);
+
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -60,9 +62,7 @@ public class MainActivity extends AppCompatActivity {
                     10);
         }
 
-
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
 
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -70,55 +70,47 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initViewListeners();
+        startBTServer();
+        listPairedDvcs();
 
+    }
+
+    private void startBTServer() {
         try {
             bluetoothServer = new BluetoothServer(bluetoothAdapter.listenUsingRfcommWithServiceRecord("app", uuid));
             bluetoothServer.setOnInputReceiveListener(new IOnInputReceiveListener() {
                 @Override
                 public void onReceive(String data) {
-                    receivedText.setText("");
-                    receivedText.setText(data);
-                    receivedText.invalidate();
+                    if (msgsBox.getText().toString().equals("msg")) msgsBox.setText("");
+                    msgsBox.append(data);
                 }
             });
             bluetoothServer.start();
         } catch (IOException e) { e.printStackTrace(); }
 
+
+    }
+
+    private void listPairedDvcs() {
+        if (bluetoothAdapter == null) return;
+
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+        if (pairedDevices.size() > 0) {
+            for (BluetoothDevice device : pairedDevices) {
+                devicesList.add(new DeviceItem(device, bluetoothAdapter, uuid));
+            }
+
+            adapter = new DevItemAdapter(devicesList);
+            devcsListRv.setLayoutManager(layoutManager);
+            devcsListRv.setAdapter(adapter);
+        }
     }
 
 
     private void initViewListeners(){
 
-        pairedDevicesLv = findViewById(R.id.pairedDevicesLv);
-        receivedText = findViewById(R.id.receivedText);
-
-        Button listPairedBtn = findViewById(R.id.listPairedBtn);
-        listPairedBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-                if (pairedDevices.size() > 0) {
-                    ArrayList<String> s_pairedDevcs = new ArrayList<>();
-                    for (BluetoothDevice device : pairedDevices) {
-                        devices.add(device);
-                        s_pairedDevcs.add(device.getName() + "\n" + device.getAddress() +"\n"+ device.getUuids()[2]);
-                    }
-
-                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_expandable_list_item_1, s_pairedDevcs);
-                    pairedDevicesLv.setAdapter(arrayAdapter);
-
-                    pairedDevicesLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            deviceChoosen = devices.get(position);
-
-                            Log.d("MAIN", "onItemClick: -----------------" + deviceChoosen.getName());
-                        }
-                    });
-                }
-            }
-        });
+        msgsBox = findViewById(R.id.receivedText);
+        devcsListRv = findViewById(R.id.pairedDevcsRv);
 
         outputText = findViewById(R.id.outputText);
 
@@ -126,20 +118,15 @@ public class MainActivity extends AppCompatActivity {
         sendDataBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bluetoothClient.writeData(outputText.getText().toString().getBytes(StandardCharsets.UTF_8));
+                for (DeviceItem device : devicesList){
+                    if (device.isConnected){
+                        device.sendData("\n" + outputText.getText().toString());
+                        msgsBox.append("\n" + outputText.getText().toString());
+                    }
+                }
             }
         });
 
-
-        connBtn = findViewById(R.id.connBtn);
-        connBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (bluetoothClient != null){ bluetoothClient.cancel();  bluetoothClient.interrupt(); }
-                bluetoothClient = new BluetoothClient(deviceChoosen, uuid, bluetoothAdapter);
-                bluetoothClient.start();
-            }
-        });
     }
 }
 

@@ -57,8 +57,6 @@ public class ConnectedBTSocket extends Thread {
 
 
     public void write(byte[] bytes) {
-        String text = new String(bytes, Charset.defaultCharset());
-        Log.d("CONN", "write: Writing to outputstream: " + text);
         try {
             mmOutStream.write(bytes);
             mmOutStream.flush();

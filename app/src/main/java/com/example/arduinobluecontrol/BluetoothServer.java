@@ -22,9 +22,13 @@ public class BluetoothServer extends Thread {
     private BluetoothServerSocket bluetoothServerSocket;
     private byte[] buffer;
     private IOnInputReceiveListener iOnInputReceiveListener;
+    private Handler handler;
+    BluetoothSocket btSocket = null;
+    InputStream inStream = null;
 
     public BluetoothServer(BluetoothServerSocket bluetoothServerSocket){
         this.bluetoothServerSocket = bluetoothServerSocket;
+        handler = new Handler();
     }
 
     public void setOnInputReceiveListener(IOnInputReceiveListener iOnInputReceiveListener){
@@ -33,11 +37,10 @@ public class BluetoothServer extends Thread {
 
     @Override
     public void run() {
-        InputStream in = null;
 
         buffer = new byte[1024];
         try {
-            BluetoothSocket btSocket = null;
+
 
             while(true) {
                 Log.d("SERVER: ", "----------------- WAITING FOR SOCKET");
@@ -48,10 +51,16 @@ public class BluetoothServer extends Thread {
             Log.d("SERVER: ", "----------------- ACCEPTED");
 
             while (true){
-                in = btSocket.getInputStream();
-                in.read(buffer);
-                if (iOnInputReceiveListener != null)
-                    iOnInputReceiveListener.onReceive(new String(buffer, Charset.defaultCharset()));
+                inStream = btSocket.getInputStream();
+                inStream.read(buffer);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (iOnInputReceiveListener != null)
+                            iOnInputReceiveListener.onReceive(new String(buffer, Charset.defaultCharset()));
+                    }
+                });
+
             }
 
         } catch (IOException e) {
